@@ -1,0 +1,37 @@
+name: Daily Discount Bot
+
+# 設定觸發時間
+on:
+  schedule:
+    # ⚠️ GitHub 伺服器使用 UTC 時間（比台灣慢 8 小時）
+    # 台灣時間早上 8:00 = UTC 時間 0:00，所以設定為 0 0 * * *
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 這行可以讓我們隨時在網頁上點擊按鈕手動測試
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 複製 GitHub 專案裡的程式碼到雲端電腦上
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. 幫雲端電腦安裝 Python 環境
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # 3. 安裝我們程式需要的擴充套件
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 lxml
+
+    # 4. 執行 Python 爬蟲，並把剛剛設定的保險箱密碼代入進去
+    - name: Run script
+      env:
+        LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
+        USER_ID: ${{ secrets.USER_ID }}
+      run: python line_test.py
